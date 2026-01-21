@@ -17,7 +17,7 @@ function App() {
     e.preventDefault();
 
     try {
-      const res = await fetch("http://backend-service:5000/auth/register", {
+      const res = await fetch("/api/auth/registe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form)
