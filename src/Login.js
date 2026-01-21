@@ -37,7 +37,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post('/api/auth/login', formData);
+            await axios.post('http://backend-service:5000/api/auth/login', formData);
             setMessage({ text: "Login successful!", color: 'green' });
         } catch (err) {
             setMessage({ text: "Invalid credentials.", color: 'red' });
