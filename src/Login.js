@@ -33,11 +33,11 @@ const Login = () => {
         cursor: 'pointer',
         marginTop: '10px'
     };
-    const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+   // const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
+            await axios.post('/api/auth/login', formData);
             setMessage({ text: "Login successful!", color: 'green' });
         } catch (err) {
             setMessage({ text: "Invalid credentials.", color: 'red' });
