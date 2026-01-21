@@ -26,7 +26,7 @@ function App() {
       const data = await res.json();
       setMessage(data.message);
     } catch (err) {
-      setMessage("Error connecting to server");
+      setMessage("Error connecting to server",err);
     }
   };
 
