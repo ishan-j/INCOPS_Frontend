@@ -1,42 +1,68 @@
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import Login from './Login';
-import Register from './Register';
+import React, { useState } from "react";
 
 function App() {
-  const navStyle = {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '0 40px',
-    backgroundColor: '#282c34',
-    color: 'white',
-    height: '60px'
+  const [form, setForm] = useState({
+    username: "",
+    email: "",
+    password: ""
+  });
+
+  const [message, setMessage] = useState("");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const linkStyle = {
-    color: 'white',
-    textDecoration: 'none',
-    marginLeft: '20px',
-    fontWeight: 'bold'
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await fetch("http://backend-service:5000/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
+
+      const data = await res.json();
+      setMessage(data.message);
+    } catch (err) {
+      setMessage("Error connecting to server");
+    }
   };
 
   return (
-    <Router>
-      <nav style={navStyle}>
-        <h2>INCOPS</h2>
-        <div>
-          <Link path to="/login" style={linkStyle}>Login</Link>
-          <Link path to="/register" style={linkStyle}>Signup</Link>
-        </div>
-      </nav>
+    <div style={{ padding: 40 }}>
+      <h2>Register</h2>
 
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '50px' }}>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-        </Routes>
-      </div>
-    </Router>
+      <form onSubmit={handleSubmit}>
+        <input
+          name="username"
+          placeholder="Username"
+          onChange={handleChange}
+          required
+        /><br /><br />
+
+        <input
+          name="email"
+          type="email"
+          placeholder="Email"
+          onChange={handleChange}
+          required
+        /><br /><br />
+
+        <input
+          name="password"
+          type="password"
+          placeholder="Password"
+          onChange={handleChange}
+          required
+        /><br /><br />
+
+        <button type="submit">Register</button>
+      </form>
+
+      <p>{message}</p>
+    </div>
   );
 }
 
