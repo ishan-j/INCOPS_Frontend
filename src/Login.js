@@ -1,68 +1,286 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState } from "react";
 
-const Login = () => {
-    const [formData, setFormData] = useState({ email: '', password: '' });
-    const [message, setMessage] = useState({ text: '', color: '' });
+function Login({ onLoginSuccess }) {
+  const [form, setForm] = useState({
+    email: "",
+    password: ""
+  });
 
-    const containerStyle = {
-        padding: '30px',
-        border: '1px solid #ccc',
-        borderRadius: '8px',
-        width: '350px',
-        boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-        textAlign: 'center'
-    };
+  const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
-    const inputStyle = {
-        width: '100%',
-        padding: '10px',
-        margin: '10px 0',
-        borderRadius: '4px',
-        border: '1px solid #ddd',
-        boxSizing: 'border-box'
-    };
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-    const buttonStyle = {
-        width: '100%',
-        padding: '10px',
-        backgroundColor: '#28a745',
-        color: 'white',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        marginTop: '10px'
-    };
-   // const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            await axios.post('http://backend-service:5000/api/auth/login', formData);
-            setMessage({ text: "Login successful!", color: 'green' });
-        } catch (err) {
-            setMessage({ text: "Invalid credentials.", color: 'red' });
-        }
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-    return (
-        <div style={containerStyle}>
-            <h2>Login</h2>
+    try {
+      const res = await fetch("api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form)
+      });
 
-            {message.text && (
-                <p style={{ color: message.color, fontWeight: 'bold' }}>{message.text}</p>
-            )}
+      const data = await res.json();
+      if (res.ok) {
+        setMessage("Login successful!");
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setTimeout(() => onLoginSuccess(), 1000);
+      } else {
+        setMessage(data.message || "Login failed");
+      }
+    } catch (err) {
+      setMessage("Error connecting to server");
+    }
+  };
 
-            <form onSubmit={handleSubmit}>
-                <input type="email" placeholder="Email" style={inputStyle} required
-                    onChange={(e) => setFormData({...formData, email: e.target.value})} />
-                
-                <input type="password" placeholder="Password" style={inputStyle} required
-                    onChange={(e) => setFormData({...formData, password: e.target.value})} />
-                
-                <button type="submit" style={buttonStyle}>Login</button>
-            </form>
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #556B2F 0%, #1a1a1a 100%)",
+      fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      padding: "20px"
+    }}>
+      {/* Header */}
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        padding: "20px 50px",
+        borderBottom: "2px solid rgba(85, 107, 47, 0.5)"
+      }}>
+        <h1 style={{
+          margin: 0,
+          fontSize: "32px",
+          fontWeight: "bold",
+          color: "#8FBC8F",
+          letterSpacing: "2px"
+        }}>INCOPs</h1>
+        
+        <div style={{ display: "flex", gap: "30px" }}>
+          <button onClick={() => window.location.reload()} style={{
+            background: "transparent",
+            border: "2px solid #8FBC8F",
+            color: "#8FBC8F",
+            padding: "10px 25px",
+            borderRadius: "0",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "600",
+            letterSpacing: "1px",
+            transition: "all 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = "#8FBC8F";
+            e.target.style.color = "#1a1a1a";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "transparent";
+            e.target.style.color = "#8FBC8F";
+          }}>
+            Login
+          </button>
+          
+          <button onClick={() => window.location.href = "/register"} style={{
+            background: "transparent",
+            border: "2px solid #556B2F",
+            color: "#556B2F",
+            padding: "10px 25px",
+            borderRadius: "0",
+            cursor: "pointer",
+            fontSize: "14px",
+            fontWeight: "600",
+            letterSpacing: "1px",
+            transition: "all 0.3s ease"
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = "#556B2F";
+            e.target.style.color = "#8FBC8F";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "transparent";
+            e.target.style.color = "#556B2F";
+          }}>
+            Register
+          </button>
         </div>
-    );
-};
+      </div>
+
+      {/* Login Form Section */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-start",
+        padding: "80px 50px",
+        minHeight: "calc(100vh - 100px)"
+      }}>
+        <div style={{
+          width: "100%",
+          maxWidth: "500px"
+        }}>
+          <h2 style={{
+            color: "#8FBC8F",
+            fontSize: "42px",
+            marginBottom: "10px",
+            fontWeight: "300",
+            letterSpacing: "1px"
+          }}>Welcome Back</h2>
+          
+          <p style={{
+            color: "#b8b8b8",
+            fontSize: "14px",
+            marginBottom: "50px",
+            letterSpacing: "0.5px"
+          }}>Sign in to access your account</p>
+
+          <form onSubmit={handleSubmit}>
+            <div style={{ marginBottom: "25px" }}>
+              <label style={{
+                display: "block",
+                color: "#8FBC8F",
+                fontSize: "12px",
+                marginBottom: "8px",
+                fontWeight: "600",
+                letterSpacing: "1px"
+              }}>EMAIL ADDRESS</label>
+              <input
+                name="email"
+                type="email"
+                placeholder="your@email.com"
+                onChange={handleChange}
+                required
+                style={{
+                  width: "100%",
+                  padding: "12px 15px",
+                  border: "1px solid #556B2F",
+                  background: "rgba(30, 30, 30, 0.7)",
+                  color: "#fff",
+                  fontSize: "14px",
+                  boxSizing: "border-box",
+                  borderRadius: "0",
+                  transition: "border-color 0.3s ease"
+                }}
+                onFocus={(e) => e.target.style.borderColor = "#8FBC8F"}
+                onBlur={(e) => e.target.style.borderColor = "#556B2F"}
+              />
+            </div>
+
+            <div style={{ marginBottom: "40px" }}>
+              <label style={{
+                display: "block",
+                color: "#8FBC8F",
+                fontSize: "12px",
+                marginBottom: "8px",
+                fontWeight: "600",
+                letterSpacing: "1px"
+              }}>PASSWORD</label>
+              <div style={{ position: "relative" }}>
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  onChange={handleChange}
+                  required
+                  style={{
+                    width: "100%",
+                    padding: "12px 40px 12px 15px",
+                    border: "1px solid #556B2F",
+                    background: "rgba(30, 30, 30, 0.7)",
+                    color: "#fff",
+                    fontSize: "14px",
+                    boxSizing: "border-box",
+                    borderRadius: "0",
+                    transition: "border-color 0.3s ease"
+                  }}
+                  onFocus={(e) => e.target.style.borderColor = "#8FBC8F"}
+                  onBlur={(e) => e.target.style.borderColor = "#556B2F"}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: "absolute",
+                    right: "12px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "transparent",
+                    border: "none",
+                    color: "#8FBC8F",
+                    cursor: "pointer",
+                    fontSize: "14px"
+                  }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" style={{
+              width: "100%",
+              padding: "14px",
+              background: "linear-gradient(135deg, #8FBC8F 0%, #556B2F 100%)",
+              color: "#1a1a1a",
+              border: "none",
+              fontSize: "14px",
+              fontWeight: "700",
+              letterSpacing: "1px",
+              cursor: "pointer",
+              transition: "transform 0.3s ease, box-shadow 0.3s ease",
+              boxShadow: "0 4px 15px rgba(85, 107, 47, 0.3)"
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0 6px 20px rgba(85, 107, 47, 0.5)";
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "0 4px 15px rgba(85, 107, 47, 0.3)";
+            }}>
+              Sign In
+            </button>
+          </form>
+
+          {message && (
+            <p style={{
+              marginTop: "20px",
+              color: message.includes("successful") ? "#8FBC8F" : "#ff6b6b",
+              textAlign: "center",
+              fontSize: "13px"
+            }}>
+              {message}
+            </p>
+          )}
+
+          <p style={{
+            marginTop: "30px",
+            color: "#999",
+            fontSize: "13px",
+            textAlign: "center"
+          }}>
+            Don't have an account? <a href="/register" style={{
+              color: "#8FBC8F",
+              textDecoration: "none",
+              fontWeight: "600"
+            }}>Register here</a>
+          </p>
+        </div>
+
+        {/* Decorative elements */}
+        <div style={{
+          position: "fixed",
+          bottom: "50px",
+          right: "50px",
+          width: "300px",
+          height: "300px",
+          background: "radial-gradient(circle, rgba(85, 107, 47, 0.1) 0%, transparent 70%)",
+          borderRadius: "50%",
+          pointerEvents: "none"
+        }}></div>
+      </div>
+    </div>
+  );
+}
 
 export default Login;

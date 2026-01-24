@@ -1,67 +1,57 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Login from "./Login";
+import Register from "./Register";
+import Homepage from "./Homepage";
 
 function App() {
-  const [form, setForm] = useState({
-    username: "",
-    email: "",
-    password: ""
-  });
+  const [currentPage, setCurrentPage] = useState("login");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const [message, setMessage] = useState("");
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      const res = await fetch("api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form)
-      });
-
-      const data = await res.json();
-      setMessage(data.message);
-    } catch (err) {
-      setMessage("Error connecting to server",err);
+  useEffect(() => {
+    // Check if user is already logged in
+    const user = localStorage.getItem("user");
+    if (user) {
+      setIsLoggedIn(true);
+      setCurrentPage("homepage");
+    } else {
+      setCurrentPage("login");
     }
+  }, []);
+
+  const handleLoginSuccess = () => {
+    setIsLoggedIn(true);
+    setCurrentPage("homepage");
   };
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setCurrentPage("login");
+    localStorage.removeItem("user");
+  };
+
+  // Simple routing based on URL or state
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === "/register") {
+      setCurrentPage("register");
+    } else if (path === "/") {
+      if (isLoggedIn) {
+        setCurrentPage("homepage");
+      } else {
+        setCurrentPage("login");
+      }
+    }
+  }, [isLoggedIn]);
 
   return (
-    <div style={{ padding: 40 }}>
-      <h2>Register</h2>
-
-      <form onSubmit={handleSubmit}>
-        <input
-          name="username"
-          placeholder="Username"
-          onChange={handleChange}
-          required
-        /><br /><br />
-
-        <input
-          name="email"
-          type="email"
-          placeholder="Email"
-          onChange={handleChange}
-          required
-        /><br /><br />
-
-        <input
-          name="password"
-          type="password"
-          placeholder="Password"
-          onChange={handleChange}
-          required
-        /><br /><br />
-
-        <button type="submit">Register</button>
-      </form>
-
-      <p>{message}</p>
+    <div>
+      {currentPage === "login" && (
+        <Login onLoginSuccess={handleLoginSuccess} />
+      )}
+      {currentPage === "register" && <Register />}
+      {currentPage === "homepage" && (
+        <Homepage onLogout={handleLogout} />
+      )}
     </div>
   );
 }
